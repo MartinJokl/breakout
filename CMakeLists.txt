@@ -3,7 +3,12 @@ project(breakout)
 
 add_executable(${PROJECT_NAME} 
     main.c
-    game.h)
+    game.h
+    game.c
+    shader.h
+    shader.c
+    texture.h
+    texture.c)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 
