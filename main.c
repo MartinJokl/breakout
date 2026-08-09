@@ -33,7 +33,6 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     game = createGame(screenWidth, screenHeight);
-    initGame(game);
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;

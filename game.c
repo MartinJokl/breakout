@@ -9,10 +9,6 @@ void freeGame(Game *game) {
 
 }
 
-void initGame(Game *game) {
-
-}
-
 void processGameInput(Game *game, float deltaTime) {
 
 }
