@@ -8,7 +8,11 @@ add_executable(${PROJECT_NAME}
     shader.h
     shader.c
     texture.h
-    texture.c)
+    texture.c
+    vector.h
+    vector.c
+    matrix.c
+    matrix.h)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

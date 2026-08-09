@@ -1,0 +1,30 @@
+#pragma once
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vec3;
+
+typedef struct {
+    float x;
+    float y;
+} Vec2;
+
+
+Vec3 createNormalizedVec3(float x, float y, float z);
+
+Vec3 vec3ToNormalized(Vec3 vec3);
+Vec3 scaleVec3(Vec3 vec3, float scale);
+
+float vec3Length(Vec3 vec3);
+
+Vec3 MultiplyVec3WithMat4(Vec3 vec3, float* mat4);
+
+Vec3 vec3Add(Vec3 a, Vec3 b);
+Vec3 vec3Subtract(Vec3 a, Vec3 b);
+
+float* indexVec3(Vec3* vec3, int index);
+
+Vec3 vec3Cross(Vec3 a, Vec3 b);
+float vec3Dot(Vec3 a, Vec3 b);
