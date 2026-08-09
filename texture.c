@@ -5,7 +5,7 @@
 #include "texture.h"
 
 
-TextureB createTexture(char* path, GLenum format, unsigned int shaderProgram, unsigned int unit, char* uniformName) {
+Texture createTexture(char* path, GLenum format, unsigned int shaderProgram, unsigned int unit, char* uniformName) {
     unsigned int texture;
     glGenTextures(1, &texture);  
     glBindTexture(GL_TEXTURE_2D, texture);  
@@ -15,7 +15,6 @@ TextureB createTexture(char* path, GLenum format, unsigned int shaderProgram, un
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    stbi_set_flip_vertically_on_load(true);
     int width, height, numberChannels;
     unsigned char *data = stbi_load(path, &width, &height, &numberChannels, 0); 
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
@@ -26,13 +25,13 @@ TextureB createTexture(char* path, GLenum format, unsigned int shaderProgram, un
     glUniform1i(glGetUniformLocation(shaderProgram, uniformName), unit);
     glUseProgram(0);
 
-    return (TextureB){
+    return (Texture){
         .id = texture,
         .unit = unit
     };
 }
 
-void useTexture(TextureB texture) {
+void useTexture(Texture texture) {
     glActiveTexture(GL_TEXTURE0 + texture.unit);
     glBindTexture(GL_TEXTURE_2D, texture.id);
 }

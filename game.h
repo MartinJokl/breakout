@@ -2,6 +2,9 @@
 
 #include <stdbool.h>
 
+#include "spriteRenderer.h"
+#include "texture.h"
+
 typedef enum {
     GAME_ACTIVE,
     GAME_MENU,
@@ -9,9 +12,14 @@ typedef enum {
 } GameState;
 
 typedef struct {
-    GameState state;
     bool keys[1024];
+    GameState state;
     unsigned int width, height;
+    unsigned int spriteShader;
+    float *projectionMatrix;
+    SpriteRenderer *spriteRenderer;
+
+    Texture face;
 } Game;
 
 Game *createGame(unsigned int width, unsigned int height);

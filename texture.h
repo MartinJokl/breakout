@@ -4,7 +4,7 @@
 typedef struct {
     unsigned int id;
     unsigned int unit;
-} TextureB;
+} Texture;
 
-TextureB createTexture(char* path, GLenum format, unsigned int shader, unsigned int unit, char* uniformName);
-void useTexture(TextureB texture);
+Texture createTexture(char* path, GLenum format, unsigned int shader, unsigned int unit, char* uniformName);
+void useTexture(Texture texture);

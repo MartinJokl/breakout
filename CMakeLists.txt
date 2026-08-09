@@ -12,7 +12,9 @@ add_executable(${PROJECT_NAME}
     vector.h
     vector.c
     matrix.c
-    matrix.h)
+    matrix.h
+    spriteRenderer.h
+    spriteRenderer.c)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

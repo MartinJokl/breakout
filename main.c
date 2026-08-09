@@ -2,6 +2,9 @@
 #include <GLFW/glfw3.h>
 
 #include "game.h"
+#include "matrix.h"
+#include "shader.h"
+#include "spriteRenderer.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -34,12 +37,10 @@ int main() {
 
     game = createGame(screenWidth, screenHeight);
 
-    float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
+        float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         glfwPollEvents();
 
