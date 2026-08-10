@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glad/glad.h>
+#include <stdlib.h>
 
 #include "shader.h"
+#include "file.h"
 
-const char* readFile(char* path);
 void checkForErrors(unsigned int shader, char* type);
 
 unsigned int createShaderProgram(char* vertexPath, char *geometryPath, char* fragmentPath) {
@@ -47,34 +46,6 @@ unsigned int createShaderProgram(char* vertexPath, char *geometryPath, char* fra
         glDeleteShader(geometryShader);
 
     return shaderProgram;
-}
-
-const char* readFile(char* path) {
-    char* text = calloc(1, sizeof(char));
-    if (text == NULL) {
-        printf("Malloc failed in readFile");
-        return NULL;
-    }
-    int textLength = 0;
-
-    FILE* pFile = fopen(path, "r");
-    char buffer[1024] = {0};
-    if (pFile == NULL) {
-        printf("Could not open file");
-        return NULL;
-    }
-    while (fgets(buffer, sizeof(buffer), pFile) != NULL) {
-        textLength += strlen(buffer) * sizeof(char);
-        char* temp = realloc(text, textLength + 1);
-        if (temp == NULL) {
-            printf("Realloc failed in readFile");
-            return NULL;
-        }
-        text = temp;
-        strcat(text, buffer);
-    }
-
-    return text;
 }
 
 void checkForErrors(unsigned int shader, char* type) {
