@@ -23,6 +23,7 @@ typedef struct {
     TextureManager *textureManager;
     GameLevel *levels[4];
     unsigned int currentLevel;
+    GameObject player;
 } Game;
 
 Game *createGame(unsigned int width, unsigned int height);

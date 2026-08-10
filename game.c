@@ -1,4 +1,6 @@
 #include "stdlib.h"
+#include <glad/glad.h>
+#include "GLFW/glfw3.h"
 
 #include "game.h"
 #include "spriteRenderer.h"
@@ -7,6 +9,9 @@
 #include "shader.h"
 #include "textureManager.h"
 #include "gameLevel.h"
+
+const Vec2 playerSize = {150.0f, 30.0f};
+const float playerVelocity = 500.0f;
 
 Game *createGame(unsigned int width, unsigned int height) {
     Game *game = malloc(sizeof(Game));
@@ -28,6 +33,23 @@ Game *createGame(unsigned int width, unsigned int height) {
     game->levels[3] = loadGameLevel("assets/levels/4.txt", width, height / 2, game->textureManager);
     game->currentLevel = 0;
 
+
+    Vec2 playerPos = {
+        (width - playerSize.x) / 2.0f, 
+        height - playerSize.y
+    };
+    game->player = (GameObject){
+        .position = playerPos,
+        .size = playerSize,
+        .color = {1.0f, 1.0f, 1.0f},
+        .texture = game->textureManager->player,
+
+        .velocity = {0.0f, 0.0f},
+        .destroyed = false,
+        .isSolid = false,
+        .rotation = 0.0f,
+    };
+
     return game;
 }
 
@@ -45,10 +67,22 @@ void freeGame(Game *game) {
 }
 
 void processGameInput(Game *game, float deltaTime) {
+    if (game->state != GAME_ACTIVE) {
+        return;
+    }
 
+    float velocity = playerVelocity * deltaTime;
+    if (game->keys[GLFW_KEY_A]) {
+        if (game->player.position.x >= 0.0f)
+            game->player.position.x -= velocity;
+    }
+    if (game->keys[GLFW_KEY_D]) {
+        if (game->player.position.x <= game->width - game->player.size.x)
+            game->player.position.x += velocity;
+    }
 }
 void updateGame(Game *game, float deltaTime) {
-
+    
 }
 void renderGame(Game *game) {
     if (game->state == GAME_ACTIVE) {
@@ -59,6 +93,8 @@ void renderGame(Game *game) {
             (Vec2){game->width, game->height}, 
             0.0f, 
             (Vec3){1.0f, 1.0f, 1.0f});
+
+        drawGameObject(game->player, game->spriteRenderer);
         
         drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
     }
