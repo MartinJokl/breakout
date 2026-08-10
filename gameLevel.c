@@ -22,7 +22,7 @@ Vec3 getColorVector(BrickColor color);
 
 GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager) {
     GameLevel *level = malloc(sizeof(GameLevel));
-    level->brickGameObjects = createList(16, sizeof(GameObject));
+    level->brickGameObjectPointers = createList(16, sizeof(GameObject *));
 
     const char *levelString = readFile(file);
 
@@ -77,34 +77,21 @@ void initGameLevel(GameLevel *level, List *tiles, unsigned int levelWidth, unsig
         unsigned int *rowData = (unsigned int *)row->data;
         for (unsigned int x = 0; x < columnCount; x++) {
             unsigned int value = rowData[x];
-            if (value == 1) { // solid
-                GameObject object = {
-                    .position = {unitWidth * x, unitHeight * y},
-                    .size = {unitWidth, unitHeight},
-                    .color = {1.0f, 1.0f, 1.0f},
-                    .texture = textureManager->solidBlock,
-
-                    .velocity = {0.0f, 0.0f},
-                    .destroyed = false,
-                    .isSolid = true,
-                    .rotation = 0.0f,
-                };
-                addToList(level->brickGameObjects, &object);
+            if (value == 0) {
+                continue;
             }
-            else if (value > 1) {
-                GameObject object = {
-                    .position = {unitWidth * x, unitHeight * y},
-                    .size = {unitWidth, unitHeight},
-                    .color = getColorVector(value),
-                    .texture = textureManager->block,
 
-                    .velocity = {0.0f, 0.0f},
-                    .destroyed = false,
-                    .isSolid = false,
-                    .rotation = 0.0f,
-                };
-                addToList(level->brickGameObjects, &object);
+            GameObject *object = createGameObject(
+                    textureManager->solidBlock, 
+                    (Vec2){unitWidth * x, unitHeight * y}, 
+                    (Vec2){unitWidth, unitHeight});
+
+            if (value > 1) {
+                object->texture = textureManager->block;
+                object->isSolid = false;
+                object->color = getColorVector(value);
             }
+            addToList(level->brickGameObjectPointers, &object);
         }
     }
 }
@@ -128,14 +115,17 @@ Vec3 getColorVector(BrickColor color) {
 }
 
 void freeGameLevel(GameLevel *level) {
-    freeList(level->brickGameObjects);
+    for (int i = 0; i < level->brickGameObjectPointers->count; i++) {
+        free(((GameObject **)(level->brickGameObjectPointers->data))[i]);
+    }
+    freeList(level->brickGameObjectPointers);
     free(level);
 }
 
 void drawGameLevel(GameLevel *level, SpriteRenderer *renderer) {
-    GameObject *bricks = (GameObject *)(level->brickGameObjects->data);
-    for (int i = 0; i < level->brickGameObjects->count; i++) {
-        if (bricks[i].destroyed) {
+    GameObject **bricks = level->brickGameObjectPointers->data;
+    for (int i = 0; i < level->brickGameObjectPointers->count; i++) {
+        if (bricks[i]->destroyed) {
             continue;
         }
         drawGameObject(bricks[i], renderer);

@@ -9,13 +9,21 @@
 #include "shader.h"
 #include "textureManager.h"
 #include "gameLevel.h"
+#include "gameObject.h"
+#include "ballObject.h"
 
 const Vec2 playerSize = {150.0f, 30.0f};
 const float playerVelocity = 500.0f;
 
+const Vec2 initialBallVelocity = {100.0f, -350.0f};
+const float ballRadius = 12.5f;
+
 Game *createGame(unsigned int width, unsigned int height) {
     Game *game = malloc(sizeof(Game));
 
+    for (int i = 0; i < sizeof(game->keys) / sizeof(bool); i++) {
+        game->keys[i] = false;
+    }
     game->state = GAME_ACTIVE;
     game->width = width;
     game->height = height;
@@ -38,17 +46,10 @@ Game *createGame(unsigned int width, unsigned int height) {
         (width - playerSize.x) / 2.0f, 
         height - playerSize.y
     };
-    game->player = (GameObject){
-        .position = playerPos,
-        .size = playerSize,
-        .color = {1.0f, 1.0f, 1.0f},
-        .texture = game->textureManager->player,
+    game->player = createGameObject(game->textureManager->player, playerPos, playerSize);
 
-        .velocity = {0.0f, 0.0f},
-        .destroyed = false,
-        .isSolid = false,
-        .rotation = 0.0f,
-    };
+    Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
+    game->ball = createBallObject(game->textureManager->ball, ballPos, ballRadius, initialBallVelocity);
 
     return game;
 }
@@ -56,6 +57,8 @@ Game *createGame(unsigned int width, unsigned int height) {
 void freeGame(Game *game) {
     glDeleteProgram(game->spriteShader);
 
+    free(game->ball);
+    free(game->player);
     free(game->projectionMatrix);
     freeSpriteRenderer(game->spriteRenderer);
     freeTextureManager(game->textureManager);
@@ -73,17 +76,29 @@ void processGameInput(Game *game, float deltaTime) {
 
     float velocity = playerVelocity * deltaTime;
     if (game->keys[GLFW_KEY_A]) {
-        if (game->player.position.x >= 0.0f)
-            game->player.position.x -= velocity;
+        if (game->player->position.x >= 0.0f) {
+            game->player->position.x -= velocity;
+            if (game->ball->stuck) {
+                game->ball->baseObject.position.x -= velocity;
+            }
+        }
     }
     if (game->keys[GLFW_KEY_D]) {
-        if (game->player.position.x <= game->width - game->player.size.x)
-            game->player.position.x += velocity;
+        if (game->player->position.x <= game->width - game->player->size.x) {
+            game->player->position.x += velocity;
+            if (game->ball->stuck) {
+                game->ball->baseObject.position.x += velocity;
+            }
+        }
     }
+    if (game->keys[GLFW_KEY_SPACE])
+        game->ball->stuck = false;
 }
+
 void updateGame(Game *game, float deltaTime) {
-    
+    ballObjectMove(game->ball, deltaTime, game->width);
 }
+
 void renderGame(Game *game) {
     if (game->state == GAME_ACTIVE) {
         drawSprite(
@@ -95,6 +110,7 @@ void renderGame(Game *game) {
             (Vec3){1.0f, 1.0f, 1.0f});
 
         drawGameObject(game->player, game->spriteRenderer);
+        drawGameObject((GameObject *)game->ball, game->spriteRenderer);
         
         drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
     }

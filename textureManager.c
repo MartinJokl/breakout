@@ -10,6 +10,7 @@ TextureManager *createTextureManager(unsigned int shader) {
     manager->solidBlock = createTexture("assets/sprites/solidBlock.png", shader, 0, "image");
     manager->background = createTexture("assets/sprites/background.jpg", shader, 0, "image");
     manager->player = createTexture("assets/sprites/paddle.png", shader, 0, "image");
+    manager->ball = createTexture("assets/sprites/awesomeface.png", shader, 0, "image");
 
     return manager;
 }
@@ -19,6 +20,7 @@ void freeTextureManager(TextureManager *manager) {
     glDeleteTextures(1, &manager->solidBlock.id);
     glDeleteTextures(1, &manager->background.id);
     glDeleteTextures(1, &manager->player.id);
+    glDeleteTextures(1, &manager->ball.id);
 
     free(manager);
 }

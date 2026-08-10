@@ -7,6 +7,7 @@ typedef struct {
     Texture block;
     Texture background;
     Texture player;
+    Texture ball;
 } TextureManager;
 
 TextureManager *createTextureManager(unsigned int shader);

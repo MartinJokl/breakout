@@ -24,7 +24,9 @@ add_executable(${PROJECT_NAME}
     list.h
     list.c
     textureManager.h
-    textureManager.c)
+    textureManager.c
+    ballObject.c
+    ballObject.h)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

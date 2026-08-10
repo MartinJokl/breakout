@@ -17,4 +17,6 @@ typedef struct {
 
 } GameObject;
 
-void drawGameObject(GameObject object, SpriteRenderer *renderer);
+void drawGameObject(GameObject *object, SpriteRenderer *renderer);
+
+GameObject *createGameObject(Texture texture, Vec2 position, Vec2 size);

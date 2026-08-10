@@ -6,6 +6,8 @@
 #include "textureManager.h"
 #include "texture.h"
 #include "gameLevel.h"
+#include "gameObject.h"
+#include "ballObject.h"
 
 typedef enum {
     GAME_ACTIVE,
@@ -23,7 +25,8 @@ typedef struct {
     TextureManager *textureManager;
     GameLevel *levels[4];
     unsigned int currentLevel;
-    GameObject player;
+    GameObject *player;
+    BallObject *ball;
 } Game;
 
 Game *createGame(unsigned int width, unsigned int height);

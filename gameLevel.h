@@ -14,7 +14,7 @@ typedef enum {
 } BrickColor;
 
 typedef struct {
-    List *brickGameObjects;
+    List *brickGameObjectPointers;
 } GameLevel;
 
 GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager);
