@@ -38,9 +38,6 @@ float vec2Length(Vec2 vec2);
 Vec2 vec2Add(Vec2 a, Vec2 b);
 Vec2 vec2Subtract(Vec2 a, Vec2 b);
 
-Vec2 vec2Clamp(Vec2 vec2, Vec2 min, Vec2 max) {
-    return (Vec2){
-        .x = clamp(vec2.x, min.x, max.x),
-        .y = clamp(vec2.y, min.y, max.y)
-    };
-}
+Vec2 vec2Clamp(Vec2 vec2, Vec2 min, Vec2 max);
+
+float vec2Dot(Vec2 a, Vec2 b);

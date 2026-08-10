@@ -16,6 +16,7 @@ BallObject *createBallObject(Texture texture, Vec2 position, float radius, Vec2 
     ball->baseObject.isSolid = true;
     ball->baseObject.rotation = 0.0f;
 
+    ball->radius = radius;
     ball->stuck = true;
 
     return ball;
@@ -26,8 +27,7 @@ Vec2 ballObjectMove(BallObject *ball, float deltaTime, unsigned int windowWidth)
         return ball->baseObject.position;
     }
 
-    ball->baseObject.position.x += ball->baseObject.velocity.x * deltaTime;
-    ball->baseObject.position.y += ball->baseObject.velocity.y * deltaTime;
+    ball->baseObject.position = vec2Add(ball->baseObject.position, scaleVec2(ball->baseObject.velocity, deltaTime));
 
     if (ball->baseObject.position.x <= 0.0f)
     {
@@ -48,6 +48,8 @@ Vec2 ballObjectMove(BallObject *ball, float deltaTime, unsigned int windowWidth)
     return ball->baseObject.position;
 }
 
-void resetBallObject(BallObject *ball) {
-
+void resetBallObject(BallObject *ball, Vec2 position, Vec2 velocity) {
+    ball->stuck = true;
+    ball->baseObject.position = position;
+    ball->baseObject.velocity = velocity;
 }

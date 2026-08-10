@@ -72,7 +72,6 @@ Vec3 vec3Cross(Vec3 a, Vec3 b) {
 }
 float vec3Dot(Vec3 a, Vec3 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
-    
 }
 
 Vec2 vec2ToNormalized(Vec2 vec2) {
@@ -117,4 +116,8 @@ Vec2 vec2Clamp(Vec2 vec2, Vec2 min, Vec2 max) {
         .x = clamp(vec2.x, min.x, max.x),
         .y = clamp(vec2.y, min.y, max.y)
     };
+}
+
+float vec2Dot(Vec2 a, Vec2 b) {
+    return a.x * b.x + a.y * b.y;
 }

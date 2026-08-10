@@ -132,6 +132,12 @@ void drawGameLevel(GameLevel *level, SpriteRenderer *renderer) {
     }
 }
 
+void resetGameLevel(GameLevel *level) {
+    GameObject **bricks = level->brickGameObjectPointers->data;
+    for (int i = 0; i < level->brickGameObjectPointers->count; i++) {
+        bricks[i]->destroyed = false;
+    }
+}
 
 bool isGameLevelCompleted() {
 

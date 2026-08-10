@@ -20,5 +20,7 @@ typedef struct {
 GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager);
 void freeGameLevel(GameLevel *level);
 
+void resetGameLevel(GameLevel *level);
+
 void drawGameLevel(GameLevel *level, SpriteRenderer *renderer);
 bool isGameLevelCompleted();
