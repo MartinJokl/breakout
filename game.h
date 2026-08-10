@@ -8,6 +8,7 @@
 #include "gameLevel.h"
 #include "gameObject.h"
 #include "ballObject.h"
+#include "postProcessor.h"
 
 typedef enum {
     GAME_ACTIVE,
@@ -27,6 +28,9 @@ typedef struct {
     unsigned int currentLevel;
     GameObject *player;
     BallObject *ball;
+    PostProcessor *postProcessor;
+
+    float shakeTime;
 } Game;
 
 Game *createGame(unsigned int width, unsigned int height);

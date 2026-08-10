@@ -11,6 +11,7 @@
 #include "gameLevel.h"
 #include "gameObject.h"
 #include "ballObject.h"
+#include "postProcessor.h"
 
 const Vec2 playerSize = {150.0f, 30.0f};
 const float playerVelocity = 500.0f;
@@ -64,12 +65,16 @@ Game *createGame(unsigned int width, unsigned int height) {
     Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
     game->ball = createBallObject(game->textureManager->ball, ballPos, ballRadius, initialBallVelocity);
 
+    game->postProcessor = createPostProcessor(width, height);
+    game->shakeTime = 0.0f;
+
     return game;
 }
 
 void freeGame(Game *game) {
     glDeleteProgram(game->spriteShader);
 
+    freePostProcessor(game->postProcessor);
     free(game->ball);
     free(game->player);
     free(game->projectionMatrix);
@@ -121,10 +126,19 @@ void updateGame(Game *game, float deltaTime) {
         Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
         resetBallObject(game->ball, ballPos, initialBallVelocity);
     }
+
+    if (game->shakeTime > 0.0f)
+    {
+        game->shakeTime -= deltaTime;
+        if (game->shakeTime <= 0.0f)
+            game->postProcessor->shake = false;
+    }
 }
 
 void renderGame(Game *game) {
     if (game->state == GAME_ACTIVE) {
+        postProcessorBeginRender(game->postProcessor);
+
         drawSprite(
             game->spriteRenderer, 
             game->textureManager->background, 
@@ -133,10 +147,13 @@ void renderGame(Game *game) {
             0.0f, 
             (Vec3){1.0f, 1.0f, 1.0f});
 
+        drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
+
         drawGameObject(game->player, game->spriteRenderer);
         drawGameObject((GameObject *)game->ball, game->spriteRenderer);
         
-        drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
+        postProcessorEndRender(game->postProcessor);
+        postProcessorRender(game->postProcessor, glfwGetTime());
     }
 }
 
@@ -152,7 +169,11 @@ void doGameCollisions(Game *game) {
         if (!collision.happened) {
             continue;
         }
-        if (!brick->isSolid) {
+        if (brick->isSolid) {
+            game->shakeTime = 0.05f;
+            game->postProcessor->shake = true;
+        }
+        else {
             brick->destroyed = true;
         }
         if (collision.direction & (LEFT | RIGHT)) {
