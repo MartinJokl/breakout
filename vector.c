@@ -74,3 +74,47 @@ float vec3Dot(Vec3 a, Vec3 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
     
 }
+
+Vec2 vec2ToNormalized(Vec2 vec2) {
+    float length = vec2Length(vec2);
+    return scaleVec2(vec2, 1.0f / length);
+}
+
+Vec2 scaleVec2(Vec2 vec2, float scale) {
+    return (Vec2){
+        .x = vec2.x * scale,
+        .y = vec2.y * scale,
+    };
+}
+
+float vec2Length(Vec2 vec2) {
+    return sqrt(pow(vec2.x, 2) + pow(vec2.y, 2));
+}
+
+Vec2 vec2Add(Vec2 a, Vec2 b) {
+    return (Vec2){
+        .x = a.x + b.x,
+        .y = a.y + b.y
+    };
+}
+
+Vec2 vec2Subtract(Vec2 a, Vec2 b) {
+    return vec2Add(a, scaleVec2(b, -1.0f));
+}
+
+float clamp(float value, float min, float max) {
+    if (value < min) {
+        value = min;
+    }
+    else if (value > max) {
+        value = max;
+    }
+    return value;
+}
+
+Vec2 vec2Clamp(Vec2 vec2, Vec2 min, Vec2 max) {
+    return (Vec2){
+        .x = clamp(vec2.x, min.x, max.x),
+        .y = clamp(vec2.y, min.y, max.y)
+    };
+}
