@@ -16,7 +16,15 @@ add_executable(${PROJECT_NAME}
     spriteRenderer.h
     spriteRenderer.c
     file.h
-    file.c)
+    file.c
+    gameObject.h
+    gameObject.c
+    gameLevel.h
+    gameLevel.c
+    list.h
+    list.c
+    textureManager.h
+    textureManager.c)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

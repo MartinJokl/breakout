@@ -4,8 +4,9 @@
 
 #include "texture.h"
 
+GLenum getFormatFromNumChannels(int numChannels);
 
-Texture createTexture(char* path, GLenum format, unsigned int shaderProgram, unsigned int unit, char* uniformName) {
+Texture createTexture(char* path, unsigned int shaderProgram, unsigned int unit, char* uniformName) {
     unsigned int texture;
     glGenTextures(1, &texture);  
     glBindTexture(GL_TEXTURE_2D, texture);  
@@ -16,7 +17,11 @@ Texture createTexture(char* path, GLenum format, unsigned int shaderProgram, uns
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     int width, height, numberChannels;
-    unsigned char *data = stbi_load(path, &width, &height, &numberChannels, 0); 
+    stbi_uc *data = stbi_load(path, &width, &height, &numberChannels, 0); 
+    if (data == NULL) {
+        printf("Failed to load texture: %s", path);
+    }
+    GLenum format = getFormatFromNumChannels(numberChannels);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     stbi_image_free(data);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -29,6 +34,17 @@ Texture createTexture(char* path, GLenum format, unsigned int shaderProgram, uns
         .id = texture,
         .unit = unit
     };
+}
+
+GLenum getFormatFromNumChannels(int numChannels) {
+    switch (numChannels) {
+        case 1:
+            return GL_RED;
+        case 3:
+            return GL_RGB;
+        case 4:
+            return GL_RGBA;
+    }
 }
 
 void useTexture(Texture texture) {

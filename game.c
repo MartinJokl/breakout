@@ -5,11 +5,13 @@
 #include "texture.h"
 #include "matrix.h"
 #include "shader.h"
+#include "textureManager.h"
+#include "gameLevel.h"
 
 Game *createGame(unsigned int width, unsigned int height) {
     Game *game = malloc(sizeof(Game));
 
-    game->state = GAME_MENU;
+    game->state = GAME_ACTIVE;
     game->width = width;
     game->height = height;
 
@@ -18,17 +20,26 @@ Game *createGame(unsigned int width, unsigned int height) {
     glUseProgram(game->spriteShader);
     glUniformMatrix4fv(glGetUniformLocation(game->spriteShader, "projection"), 1, GL_FALSE, game->projectionMatrix);
     game->spriteRenderer = createSpriteRenderer(game->spriteShader);
-    game->face = createTexture("assets/awesomeface.png", GL_RGBA, game->spriteShader, 0, "image");
+    game->textureManager = createTextureManager(game->spriteShader);
+
+    game->levels[0] = loadGameLevel("assets/levels/1.txt", width, height / 2, game->textureManager);
+    game->levels[1] = loadGameLevel("assets/levels/2.txt", width, height / 2, game->textureManager);
+    game->levels[2] = loadGameLevel("assets/levels/3.txt", width, height / 2, game->textureManager);
+    game->levels[3] = loadGameLevel("assets/levels/4.txt", width, height / 2, game->textureManager);
+    game->currentLevel = 0;
 
     return game;
 }
 
 void freeGame(Game *game) {
     glDeleteProgram(game->spriteShader);
-    glDeleteTextures(1, &game->face.id);
 
     free(game->projectionMatrix);
     freeSpriteRenderer(game->spriteRenderer);
+    freeTextureManager(game->textureManager);
+    for (int i = 0; i < sizeof(game->levels) / sizeof(GameLevel *); i++) {
+        freeGameLevel(game->levels[i]);
+    }
 
     free(game);
 }
@@ -40,5 +51,15 @@ void updateGame(Game *game, float deltaTime) {
 
 }
 void renderGame(Game *game) {
-    drawSprite(game->spriteRenderer, game->face, (Vec2){200.0f, 200.0f}, (Vec2){300.0f, 400.0f}, 3.14 / 4.0f, (Vec3){0.0f, 1.0f, 0.0f});
+    if (game->state == GAME_ACTIVE) {
+        drawSprite(
+            game->spriteRenderer, 
+            game->textureManager->background, 
+            (Vec2){0.0f, 0.0f}, 
+            (Vec2){game->width, game->height}, 
+            0.0f, 
+            (Vec3){1.0f, 1.0f, 1.0f});
+        
+        drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
+    }
 }

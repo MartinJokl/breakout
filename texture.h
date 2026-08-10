@@ -6,5 +6,5 @@ typedef struct {
     unsigned int unit;
 } Texture;
 
-Texture createTexture(char* path, GLenum format, unsigned int shader, unsigned int unit, char* uniformName);
+Texture createTexture(char* path, unsigned int shader, unsigned int unit, char* uniformName);
 void useTexture(Texture texture);

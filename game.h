@@ -3,7 +3,9 @@
 #include <stdbool.h>
 
 #include "spriteRenderer.h"
+#include "textureManager.h"
 #include "texture.h"
+#include "gameLevel.h"
 
 typedef enum {
     GAME_ACTIVE,
@@ -18,8 +20,9 @@ typedef struct {
     unsigned int spriteShader;
     float *projectionMatrix;
     SpriteRenderer *spriteRenderer;
-
-    Texture face;
+    TextureManager *textureManager;
+    GameLevel *levels[4];
+    unsigned int currentLevel;
 } Game;
 
 Game *createGame(unsigned int width, unsigned int height);

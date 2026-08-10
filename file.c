@@ -5,7 +5,7 @@
 #include "file.h"
 
 
-const char *readFile(char *path)
+const char *readFile(const char *path)
 {
     char *text = calloc(1, sizeof(char));
     if (text == NULL)
