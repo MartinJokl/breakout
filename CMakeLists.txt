@@ -28,7 +28,9 @@ add_executable(${PROJECT_NAME}
     ballObject.c
     ballObject.h
     postProcessor.h
-    postProcessor.c)
+    postProcessor.c
+    powerup.h
+    powerup.c)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

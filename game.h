@@ -29,6 +29,7 @@ typedef struct {
     GameObject *player;
     BallObject *ball;
     PostProcessor *postProcessor;
+    List *powerUpPointers;
 
     float shakeTime;
 } Game;

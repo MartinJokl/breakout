@@ -18,6 +18,8 @@ BallObject *createBallObject(Texture texture, Vec2 position, float radius, Vec2 
 
     ball->radius = radius;
     ball->stuck = true;
+    ball->passthrough = false;
+    ball->sticky = false;
 
     return ball;
 }

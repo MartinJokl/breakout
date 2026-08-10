@@ -6,6 +6,8 @@ typedef struct {
     GameObject baseObject;
     float radius;
     bool stuck;
+    bool sticky;
+    bool passthrough;
 } BallObject;
 
 BallObject *createBallObject(Texture texture, Vec2 position, float radius, Vec2 velocity);

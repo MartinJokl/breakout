@@ -12,6 +12,7 @@
 #include "gameObject.h"
 #include "ballObject.h"
 #include "postProcessor.h"
+#include "powerup.h"
 
 const Vec2 playerSize = {150.0f, 30.0f};
 const float playerVelocity = 500.0f;
@@ -34,6 +35,7 @@ typedef struct {
 
 void doGameCollisions(Game *game);
 Collision checkCollision(BallObject *ball, GameObject *object);
+bool checkCollisionSquares(GameObject *a, GameObject *b);
 
 Game *createGame(unsigned int width, unsigned int height) {
     Game *game = malloc(sizeof(Game));
@@ -61,11 +63,15 @@ Game *createGame(unsigned int width, unsigned int height) {
 
     Vec2 playerPos = {(width - playerSize.x) / 2.0f, height - playerSize.y};
     game->player = createGameObject(game->textureManager->player, playerPos, playerSize);
+    game->player->velocity.x = playerVelocity;
 
     Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
     game->ball = createBallObject(game->textureManager->ball, ballPos, ballRadius, initialBallVelocity);
 
     game->postProcessor = createPostProcessor(width, height);
+
+    game->powerUpPointers = createList(8, sizeof(PowerUp *));
+
     game->shakeTime = 0.0f;
 
     return game;
@@ -84,6 +90,11 @@ void freeGame(Game *game) {
         freeGameLevel(game->levels[i]);
     }
 
+    for (int i = 0; i < game->powerUpPointers->count; i++) {
+        free(((PowerUp **)(game->powerUpPointers->data))[i]);
+    }
+    freeList(game->powerUpPointers);
+
     free(game);
 }
 
@@ -92,7 +103,7 @@ void processGameInput(Game *game, float deltaTime) {
         return;
     }
 
-    float velocity = playerVelocity * deltaTime;
+    float velocity = game->player->velocity.x * deltaTime;
     if (game->keys[GLFW_KEY_A]) {
         if (game->player->position.x >= 0.0f) {
             game->player->position.x -= velocity;
@@ -113,26 +124,55 @@ void processGameInput(Game *game, float deltaTime) {
         game->ball->stuck = false;
 }
 
+void updatePowerUps(Game *game, float deltaTime) {
+    for (int i = 0; i < game->powerUpPointers->count; i++) {
+        PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
+        if (!powerUp->baseObject.destroyed) {
+            powerUp->baseObject.position = vec2Add(powerUp->baseObject.position, scaleVec2(powerUp->baseObject.velocity, deltaTime));
+        }
+        if (powerUp->activated) {
+            powerUp->duration -= deltaTime;
+            if (powerUp->duration < 0.0f) {
+                unapplyPowerUp(powerUp, game);
+            }
+        }
+    }
+}
+
+void resetGame(Game *game) {
+    for (int i = 0; i < game->powerUpPointers->count; i++) {
+        PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
+        if (powerUp->activated) {
+            unapplyPowerUp(powerUp, game);
+            free(powerUp);
+        }
+    }
+    game->powerUpPointers->count = 0;
+    
+    resetGameLevel(game->levels[game->currentLevel]);
+    Vec2 playerPos = {(game->width - playerSize.x) / 2.0f, game->height - playerSize.y};
+    game->player->position = playerPos;
+    Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
+    resetBallObject(game->ball, ballPos, initialBallVelocity);
+    
+}
+
 void updateGame(Game *game, float deltaTime) {
     ballObjectMove(game->ball, deltaTime, game->width);
 
     doGameCollisions(game);
 
-    if (game->ball->baseObject.position.y >= game->height)
-    {
-        resetGameLevel(game->levels[game->currentLevel]);
-        Vec2 playerPos = {(game->width - playerSize.x) / 2.0f, game->height - playerSize.y};
-        game->player->position = playerPos;
-        Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
-        resetBallObject(game->ball, ballPos, initialBallVelocity);
+    if (game->ball->baseObject.position.y >= game->height) {
+        resetGame(game);
     }
 
-    if (game->shakeTime > 0.0f)
-    {
+    if (game->shakeTime > 0.0f) {
         game->shakeTime -= deltaTime;
         if (game->shakeTime <= 0.0f)
             game->postProcessor->shake = false;
     }
+
+    updatePowerUps(game, deltaTime);
 }
 
 void renderGame(Game *game) {
@@ -148,6 +188,14 @@ void renderGame(Game *game) {
             (Vec3){1.0f, 1.0f, 1.0f});
 
         drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
+
+        
+        for (int i = 0; i < game->powerUpPointers->count; i++) {
+            PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
+            if (powerUp->baseObject.destroyed)
+                continue;
+            drawGameObject((GameObject *)powerUp, game->spriteRenderer);
+        }
 
         drawGameObject(game->player, game->spriteRenderer);
         drawGameObject((GameObject *)game->ball, game->spriteRenderer);
@@ -175,6 +223,12 @@ void doGameCollisions(Game *game) {
         }
         else {
             brick->destroyed = true;
+            PowerUp * powerUp = trySpawnPowerUp(brick->position, game->textureManager);
+            if (powerUp) {
+                addToList(game->powerUpPointers, &powerUp);
+            }
+            if (game->ball->passthrough)
+                continue;
         }
         if (collision.direction & (LEFT | RIGHT)) {
             game->ball->baseObject.velocity.x *= -1;
@@ -204,13 +258,28 @@ void doGameCollisions(Game *game) {
         game->ball->baseObject.velocity.x = percentage * strength * initialBallVelocity.x; 
         game->ball->baseObject.velocity.y = -1.0f * abs(game->ball->baseObject.velocity.y);
         game->ball->baseObject.velocity = scaleVec2(vec2ToNormalized(game->ball->baseObject.velocity), vec2Length(oldVelocity));
+
+        game->ball->stuck = game->ball->sticky;
     } 
 
+    for (int i = 0; i < game->powerUpPointers->count; i++) {
+        PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
+        if (powerUp->baseObject.destroyed) {
+            continue;
+        }
+        if (powerUp->baseObject.position.y >= game->height) {
+            powerUp->baseObject.destroyed = true;
+            continue;
+        }
+        if (checkCollisionSquares(game->player, (GameObject *)powerUp)) {
+            applyPowerUp(powerUp, game);
+            powerUp->baseObject.destroyed = true;
+        }
+    }
 }
 
 
-Direction vectorDirection(Vec2 target)
-{
+Direction vectorDirection(Vec2 target) {
     Vec2 compass[] = {
         {0.0f, 1.0f},
         {1.0f, 0.0f},
@@ -251,4 +320,15 @@ Collision checkCollision(BallObject *ball, GameObject *object) {
         };
     }
     return (Collision){.happened = false};
+} 
+
+bool checkCollisionSquares(GameObject *a, GameObject *b)
+{
+    bool collisionX = a->position.x + a->size.x >= b->position.x &&
+        b->position.x + b->size.x >= a->position.x;
+
+    bool collisionY = a->position.y + a->size.y >= b->position.y &&
+        b->position.y + b->size.y >= a->position.y;
+
+    return collisionX && collisionY;
 } 
