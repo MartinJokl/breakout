@@ -130,7 +130,7 @@ Vec3 getColorVector(BrickColor color) {
         case BRICK_COLOR_GREEN:
             return (Vec3){0.2, 1.0, 0.2};
         case BRICK_COLOR_PINK:
-            return (Vec3){0.2, 0.2, 1.0};
+            return (Vec3){1.0, 0.2, 1.0};
         case BRICK_COLOR_YELLOW:
             return (Vec3){1.0, 1.0, 0.2};
         case BRICK_COLOR_RED:
