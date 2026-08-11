@@ -45,9 +45,7 @@ int main() {
         glfwPollEvents();
 
         processGameInput(game, deltaTime);
-        for (int i = 0; i < sizeof(game->keys) / sizeof(bool); i++) {
-            game->newKeys[i] = false;
-        }
+        memset(game->newKeys, false, sizeof(game->newKeys) / sizeof(bool));
 
         updateGame(game, deltaTime);
 

@@ -41,10 +41,9 @@ bool checkCollisionSquares(GameObject *a, GameObject *b);
 Game *createGame(unsigned int width, unsigned int height) {
     Game *game = malloc(sizeof(Game));
 
-    for (int i = 0; i < sizeof(game->keys) / sizeof(bool); i++) {
-        game->keys[i] = false;
-        game->newKeys[i] = false;
-    }
+    memset(game->keys, false, sizeof(game->keys) / sizeof(bool));
+    memset(game->newKeys, false, sizeof(game->newKeys) / sizeof(bool));
+
     game->state = GAME_MENU;
     game->width = width;
     game->height = height;
