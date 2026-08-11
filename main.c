@@ -10,8 +10,8 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 
-const unsigned int screenWidth = 800;
-const unsigned int screenHeight = 600;
+const unsigned int screenWidth = 1200;
+const unsigned int screenHeight = 900;
 
 Game *game;
 

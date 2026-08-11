@@ -6,8 +6,8 @@
 #include "game.h"
 
 const int powerUpChance = 5;
-const Vec2 size = {60.0f, 20.0f};
-const Vec2 velocity = {0.0f, 150.0f};
+const Vec2 size = {90.0f, 30.0f};
+const Vec2 velocity = {0.0f, 225.0f};
 
 const float speedPowerMult = 2.0f;
 const float sizePowerMult = 2.0f;

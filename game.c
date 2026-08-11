@@ -15,11 +15,11 @@
 #include "powerup.h"
 #include "text.h"
 
-const Vec2 playerSize = {150.0f, 30.0f};
-const float playerVelocity = 400.0f;
+const Vec2 playerSize = {225.0f, 45.0f};
+const float playerVelocity = 600.0f;
 
-const Vec2 initialBallVelocity = {170.0f, -520.0f};
-const float ballRadius = 12.5f;
+const Vec2 initialBallVelocity = {255.0f, -780.0f};
+const float ballRadius = 18.75f;
 
 typedef enum {
     UP = 0b0001,
@@ -75,7 +75,7 @@ Game *createGame(unsigned int width, unsigned int height) {
 
     game->powerUpPointers = createList(8, sizeof(PowerUp *));
 
-    game->textRenderer = createTextRenderer(width, height, "assets/fonts/ocraext.ttf", 24);
+    game->textRenderer = createTextRenderer(width, height, "assets/fonts/ocraext.ttf", 36);
 
     game->shakeTime = 0.0f;
 
@@ -211,17 +211,17 @@ void renderGame(Game *game) {
 
     switch (game->state) {
         case GAME_WIN:
-            renderText(game->textRenderer, "You won", 340.0f, game->height / 2 + 95.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+            renderText(game->textRenderer, "You won", 510.0f, game->height / 2 + 142.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
         case GAME_MENU:
             if (game->currentLevel == sizeof(game->levels) / sizeof(GameLevel))
-                renderText(game->textRenderer, "Randomly generated level", 220.0f, game->height / 2 + 35.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+                renderText(game->textRenderer, "Randomly generated level", 330.0f, game->height / 2 + 52.5f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
             else {
                 char levelText[8];
                 sprintf(levelText, "Level %d", game->currentLevel + 1);
-                renderText(game->textRenderer, levelText, 340.0f, game->height / 2 + 35.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+                renderText(game->textRenderer, levelText, 510.0f, game->height / 2 + 52.5f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
             }
-            renderText(game->textRenderer, "Press SPACE to start", 250.0f, game->height / 2 + 10.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
-            renderText(game->textRenderer, "Press W or S to select level", 245.0f, game->height / 2 + 65.0f, 0.75f, (Vec3){0.6f, 0.6f, 0.6f});
+            renderText(game->textRenderer, "Press SPACE to start", 375.0f, game->height / 2 + 15.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+            renderText(game->textRenderer, "Press W or S to select level", 364.0f, game->height / 2 + 97.5f, 0.75f, (Vec3){0.6f, 0.6f, 0.6f});
         case GAME_ACTIVE:
             if (game->currentLevel != sizeof(game->levels) / sizeof(GameLevel)) {
                 drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
