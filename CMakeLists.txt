@@ -36,6 +36,8 @@ add_executable(${PROJECT_NAME}
     icon.rc
     info.rc)
 
+set(CMAKE_C_FLAGS "-mwindows")
+
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 
      "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.*" 
@@ -61,11 +63,11 @@ add_dependencies(${PROJECT_NAME} copy_assets)
 include_directories(include)
 
 # GLAD
-add_library(glad SHARED ${CMAKE_SOURCE_DIR}/lib/glad.c)
+add_library(glad STATIC ${CMAKE_SOURCE_DIR}/lib/glad.c)
 target_link_libraries(${PROJECT_NAME} glad)
 
 # STB
-add_library(stb SHARED ${CMAKE_SOURCE_DIR}/lib/stb.c)
+add_library(stb STATIC ${CMAKE_SOURCE_DIR}/lib/stb.c)
 target_link_libraries(${PROJECT_NAME} stb)
 
 # GLFW
