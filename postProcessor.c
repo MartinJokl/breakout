@@ -85,12 +85,9 @@ void initRenderData(PostProcessor *postProcessor) {
     float vertices[] = {
         // pos        // tex
         -1.0f, -1.0f, 0.0f, 0.0f,
-        1.0f,  1.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, 0.0f, 1.0f,
-
-        -1.0f, -1.0f, 0.0f, 0.0f,
         1.0f, -1.0f, 1.0f, 0.0f,
-        1.0f,  1.0f, 1.0f, 1.0f
+        -1.0f,  1.0f, 0.0f, 1.0f,
+        1.0f,  1.0f, 1.0f, 1.0f,
     };
     glGenVertexArrays(1, &postProcessor->VAO);
     glGenBuffers(1, &postProcessor->VBO);
@@ -153,6 +150,6 @@ void postProcessorRender(PostProcessor *postProcessor, float time) {
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(postProcessor->VAO);
     glBindTexture(GL_TEXTURE_2D, postProcessor->textureId);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }

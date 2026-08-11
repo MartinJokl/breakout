@@ -69,13 +69,10 @@ void renderText(TextRenderer *textRenderer, char *text, float x, float y, float 
         float h = ch.sizeY * scale;
         
         float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 0.0f },
             { xpos,     ypos,       0.0f, 0.0f },
-
+            { xpos + w, ypos,       1.0f, 0.0f },
             { xpos,     ypos + h,   0.0f, 1.0f },
             { xpos + w, ypos + h,   1.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 0.0f }
         };
         
         glBindTexture(GL_TEXTURE_2D, ch.textureID);
@@ -84,7 +81,7 @@ void renderText(TextRenderer *textRenderer, char *text, float x, float y, float 
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         // advance is number of 1/64 pixels)
         x += (ch.advance >> 6) * scale;
     }
