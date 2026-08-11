@@ -72,9 +72,9 @@ PostProcessor *createPostProcessor(unsigned int width, unsigned int height) {
     };
     glUniform1iv(glGetUniformLocation(postProcessor->postProcessingShader, "edge_kernel"), 9, edge_kernel);
     float blur_kernel[9] = {
-        1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f,
-        2.0f / 16.0f, 4.0f / 16.0f, 2.0f / 16.0f,
-        1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f
+        0.5f / 16.0f, 1.0f / 16.0f, 0.5f / 16.0f,
+        1.0f / 16.0f, 10.0f / 16.0f, 1.0f / 16.0f,
+        0.5f / 16.0f, 1.0f / 16.0f, 0.5f / 16.0f
     };
     glUniform1fv(glGetUniformLocation(postProcessor->postProcessingShader, "blur_kernel"), 9, blur_kernel);  
 
