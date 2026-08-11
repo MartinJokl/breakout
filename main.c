@@ -45,11 +45,12 @@ int main() {
         glfwPollEvents();
 
         processGameInput(game, deltaTime);
+        for (int i = 0; i < sizeof(game->keys) / sizeof(bool); i++) {
+            game->newKeys[i] = false;
+        }
 
         updateGame(game, deltaTime);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
         renderGame(game);
 
         glfwSwapBuffers(window);
@@ -63,12 +64,14 @@ int main() {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (key >= 0 && key < 1024)
-    {
-        if (action == GLFW_PRESS)
+    if (key >= 0 && key < 1024) {
+        if (action == GLFW_PRESS) {
+            game->newKeys[key] = true;
             game->keys[key] = true;
-        else if (action == GLFW_RELEASE)
+        }
+        else if (action == GLFW_RELEASE) {
             game->keys[key] = false;
+        }
     }
 }
 

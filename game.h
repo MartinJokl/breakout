@@ -9,6 +9,7 @@
 #include "gameObject.h"
 #include "ballObject.h"
 #include "postProcessor.h"
+#include "text.h"
 
 typedef enum {
     GAME_ACTIVE,
@@ -18,6 +19,7 @@ typedef enum {
 
 typedef struct {
     bool keys[1024];
+    bool newKeys[1024];
     GameState state;
     unsigned int width, height;
     unsigned int spriteShader;
@@ -25,11 +27,14 @@ typedef struct {
     SpriteRenderer *spriteRenderer;
     TextureManager *textureManager;
     GameLevel *levels[4];
+    GameLevel *generatedLevel;
     unsigned int currentLevel;
     GameObject *player;
     BallObject *ball;
     PostProcessor *postProcessor;
     List *powerUpPointers;
+
+    TextRenderer *textRenderer;
 
     float shakeTime;
 } Game;

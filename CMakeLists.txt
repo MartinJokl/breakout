@@ -30,7 +30,9 @@ add_executable(${PROJECT_NAME}
     postProcessor.h
     postProcessor.c
     powerup.h
-    powerup.c)
+    powerup.c
+    text.h
+    text.c)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 

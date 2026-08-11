@@ -13,11 +13,12 @@
 #include "ballObject.h"
 #include "postProcessor.h"
 #include "powerup.h"
+#include "text.h"
 
 const Vec2 playerSize = {150.0f, 30.0f};
-const float playerVelocity = 500.0f;
+const float playerVelocity = 400.0f;
 
-const Vec2 initialBallVelocity = {150.0f, -450.0f};
+const Vec2 initialBallVelocity = {170.0f, -520.0f};
 const float ballRadius = 12.5f;
 
 typedef enum {
@@ -42,8 +43,9 @@ Game *createGame(unsigned int width, unsigned int height) {
 
     for (int i = 0; i < sizeof(game->keys) / sizeof(bool); i++) {
         game->keys[i] = false;
+        game->newKeys[i] = false;
     }
-    game->state = GAME_ACTIVE;
+    game->state = GAME_MENU;
     game->width = width;
     game->height = height;
 
@@ -59,6 +61,7 @@ Game *createGame(unsigned int width, unsigned int height) {
     game->levels[2] = loadGameLevel("assets/levels/3.txt", width, height / 2, game->textureManager);
     game->levels[3] = loadGameLevel("assets/levels/4.txt", width, height / 2, game->textureManager);
     game->currentLevel = 0;
+    game->generatedLevel = generateGameLevel(width, height / 2, game->textureManager);
 
 
     Vec2 playerPos = {(width - playerSize.x) / 2.0f, height - playerSize.y};
@@ -72,6 +75,8 @@ Game *createGame(unsigned int width, unsigned int height) {
 
     game->powerUpPointers = createList(8, sizeof(PowerUp *));
 
+    game->textRenderer = createTextRenderer(width, height, "assets/fonts/ocraext.ttf", 24);
+
     game->shakeTime = 0.0f;
 
     return game;
@@ -79,6 +84,8 @@ Game *createGame(unsigned int width, unsigned int height) {
 
 void freeGame(Game *game) {
     glDeleteProgram(game->spriteShader);
+
+    freeTextRenderer(game->textRenderer);
 
     freePostProcessor(game->postProcessor);
     free(game->ball);
@@ -89,6 +96,7 @@ void freeGame(Game *game) {
     for (int i = 0; i < sizeof(game->levels) / sizeof(GameLevel *); i++) {
         freeGameLevel(game->levels[i]);
     }
+    freeGameLevel(game->generatedLevel);
 
     for (int i = 0; i < game->powerUpPointers->count; i++) {
         free(((PowerUp **)(game->powerUpPointers->data))[i]);
@@ -100,28 +108,35 @@ void freeGame(Game *game) {
 
 void processGameInput(Game *game, float deltaTime) {
     if (game->state != GAME_ACTIVE) {
-        return;
+        if (game->keys[GLFW_KEY_SPACE])
+            game->state = GAME_ACTIVE;
+        if (game->newKeys[GLFW_KEY_W])
+            game->currentLevel++;
+        if (game->newKeys[GLFW_KEY_S])
+            game->currentLevel += sizeof(game->levels) / sizeof(GameLevel);
+        game->currentLevel %= sizeof(game->levels) / sizeof(GameLevel) + 1;
     }
-
-    float velocity = game->player->velocity.x * deltaTime;
-    if (game->keys[GLFW_KEY_A]) {
-        if (game->player->position.x >= 0.0f) {
-            game->player->position.x -= velocity;
-            if (game->ball->stuck) {
-                game->ball->baseObject.position.x -= velocity;
+    if (game->state == GAME_ACTIVE) {
+        float velocity = game->player->velocity.x * deltaTime;
+        if (game->keys[GLFW_KEY_A]) {
+            if (game->player->position.x >= 0.0f) {
+                game->player->position.x -= velocity;
+                if (game->ball->stuck) {
+                    game->ball->baseObject.position.x -= velocity;
+                }
             }
         }
-    }
-    if (game->keys[GLFW_KEY_D]) {
-        if (game->player->position.x <= game->width - game->player->size.x) {
-            game->player->position.x += velocity;
-            if (game->ball->stuck) {
-                game->ball->baseObject.position.x += velocity;
+        if (game->keys[GLFW_KEY_D]) {
+            if (game->player->position.x <= game->width - game->player->size.x) {
+                game->player->position.x += velocity;
+                if (game->ball->stuck) {
+                    game->ball->baseObject.position.x += velocity;
+                }
             }
         }
+        if (game->keys[GLFW_KEY_SPACE])
+            game->ball->stuck = false;
     }
-    if (game->keys[GLFW_KEY_SPACE])
-        game->ball->stuck = false;
 }
 
 void updatePowerUps(Game *game, float deltaTime) {
@@ -148,16 +163,24 @@ void resetGame(Game *game) {
         }
     }
     game->powerUpPointers->count = 0;
-    
-    resetGameLevel(game->levels[game->currentLevel]);
+    if (game->currentLevel == sizeof(game->levels) / sizeof(GameLevel)) {
+        freeGameLevel(game->generatedLevel);
+        game->generatedLevel = generateGameLevel(game->width, game->height / 2, game->textureManager);
+    }
+    else {
+        resetGameLevel(game->levels[game->currentLevel]);
+    }
     Vec2 playerPos = {(game->width - playerSize.x) / 2.0f, game->height - playerSize.y};
     game->player->position = playerPos;
     Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
     resetBallObject(game->ball, ballPos, initialBallVelocity);
-    
+    game->state = GAME_MENU;
 }
 
 void updateGame(Game *game, float deltaTime) {
+    if (!game->state == GAME_ACTIVE)
+        return;
+
     ballObjectMove(game->ball, deltaTime, game->width);
 
     doGameCollisions(game);
@@ -176,33 +199,50 @@ void updateGame(Game *game, float deltaTime) {
 }
 
 void renderGame(Game *game) {
-    if (game->state == GAME_ACTIVE) {
-        postProcessorBeginRender(game->postProcessor);
+    postProcessorBeginRender(game->postProcessor);
 
-        drawSprite(
-            game->spriteRenderer, 
-            game->textureManager->background, 
-            (Vec2){0.0f, 0.0f}, 
-            (Vec2){game->width, game->height}, 
-            0.0f, 
-            (Vec3){1.0f, 1.0f, 1.0f});
+    drawSprite(
+        game->spriteRenderer, 
+        game->textureManager->background, 
+        (Vec2){0.0f, 0.0f}, 
+        (Vec2){game->width, game->height}, 
+        0.0f, 
+        (Vec3){1.0f, 1.0f, 1.0f});
 
-        drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
-
-        
-        for (int i = 0; i < game->powerUpPointers->count; i++) {
-            PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
-            if (powerUp->baseObject.destroyed)
-                continue;
-            drawGameObject((GameObject *)powerUp, game->spriteRenderer);
-        }
-
-        drawGameObject(game->player, game->spriteRenderer);
-        drawGameObject((GameObject *)game->ball, game->spriteRenderer);
-        
-        postProcessorEndRender(game->postProcessor);
-        postProcessorRender(game->postProcessor, glfwGetTime());
+    switch (game->state) {
+        case GAME_WIN:
+            renderText(game->textRenderer, "You won", 340.0f, game->height / 2 + 95.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+        case GAME_MENU:
+            if (game->currentLevel == sizeof(game->levels) / sizeof(GameLevel))
+                renderText(game->textRenderer, "Randomly generated level", 220.0f, game->height / 2 + 35.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+            else {
+                char levelText[8];
+                sprintf(levelText, "Level %d", game->currentLevel + 1);
+                renderText(game->textRenderer, levelText, 340.0f, game->height / 2 + 35.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+            }
+            renderText(game->textRenderer, "Press SPACE to start", 250.0f, game->height / 2 + 10.0f, 1.0f, (Vec3){1.0f, 1.0f, 1.0f});
+            renderText(game->textRenderer, "Press W or S to select level", 245.0f, game->height / 2 + 65.0f, 0.75f, (Vec3){0.6f, 0.6f, 0.6f});
+        case GAME_ACTIVE:
+            if (game->currentLevel != sizeof(game->levels) / sizeof(GameLevel)) {
+                drawGameLevel(game->levels[game->currentLevel], game->spriteRenderer);
+            }
+            else if (game->state == GAME_ACTIVE) {
+                drawGameLevel(game->generatedLevel, game->spriteRenderer);
+            }
+    
+            for (int i = 0; i < game->powerUpPointers->count; i++) {
+                PowerUp *powerUp = ((PowerUp **)(game->powerUpPointers->data))[i];
+                if (powerUp->baseObject.destroyed)
+                    continue;
+                drawGameObject((GameObject *)powerUp, game->spriteRenderer);
+            }
+    
+            drawGameObject(game->player, game->spriteRenderer);
+            drawGameObject((GameObject *)game->ball, game->spriteRenderer);
+            break;
     }
+    postProcessorEndRender(game->postProcessor);
+    postProcessorRender(game->postProcessor, glfwGetTime());
 }
 
 
@@ -229,6 +269,14 @@ void doGameCollisions(Game *game) {
             }
             if (game->ball->passthrough)
                 continue;
+        }
+        if (isGameLevelCompleted(
+            (game->currentLevel == sizeof(game->levels) / sizeof(GameLevel)) 
+            ? game->generatedLevel
+            : game->levels[game->currentLevel]))
+        {
+            resetGame(game);
+            game->state = GAME_WIN;
         }
         if (collision.direction & (LEFT | RIGHT)) {
             game->ball->baseObject.velocity.x *= -1;

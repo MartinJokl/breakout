@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "gameLevel.h"
 #include "stdlib.h"
@@ -19,12 +20,40 @@ typedef enum {
 
 void initGameLevel(GameLevel *level, List *tiles, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager);
 Vec3 getColorVector(BrickColor color);
+GameLevel* createGamelevel(const char *levelString, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager);
 
 GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager) {
+    const char *levelString = readFile(file);
+
+    GameLevel *level = createGamelevel(levelString, levelWidth, levelHeight, textureManager);
+
+    free((char *)levelString);
+
+    return level;
+}
+
+GameLevel *generateGameLevel(unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager) {
+    const int rowCount = 10, columnCount = 20;
+    char levelString[410] = {0}; // lenght = (columnCount * 2 + 1) * rowCount
+    for (int x = 0; x < rowCount; x++) {
+        for (int y = 0; y < columnCount; y++) {
+            int number = rand() % BRICK_COLOR_COUNT;
+            char segment[3] = "n ";
+            segment[0] = '0' + number;
+            strcat(levelString, segment);
+        }
+        if (x < rowCount - 1)
+            strcat(levelString, "\n");
+    }
+
+    GameLevel *level = createGamelevel(levelString, levelWidth, levelHeight, textureManager);
+
+    return level;
+}
+
+GameLevel* createGamelevel(const char *levelString, unsigned int levelWidth, unsigned int levelHeight, TextureManager *textureManager) {
     GameLevel *level = malloc(sizeof(GameLevel));
     level->brickGameObjectPointers = createList(16, sizeof(GameObject *));
-
-    const char *levelString = readFile(file);
 
     List *tiles = createList(4, sizeof(List *));
 
@@ -45,7 +74,6 @@ GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int
         else if (isdigit(levelString[i])) {
             if (lastChar == DIGIT_CHAR) {
                 printf("double digit numbers are not supported in levels!");
-                printf("file: %s, line: %d", file, tiles->count);
                 continue;
             }
             unsigned int value = levelString[i] - '0';
@@ -60,8 +88,6 @@ GameLevel *loadGameLevel(const char *file, unsigned int levelWidth, unsigned int
        freeList(((List **)(tiles->data))[i]);
     }
     freeList(tiles);
-    free((char *)levelString);
-
     return level;
 }
 
@@ -139,6 +165,11 @@ void resetGameLevel(GameLevel *level) {
     }
 }
 
-bool isGameLevelCompleted() {
-
+bool isGameLevelCompleted(GameLevel *level) {
+    GameObject **bricks = level->brickGameObjectPointers->data;
+    for (int i = 0; i < level->brickGameObjectPointers->count; i++) {
+        if (!bricks[i]->destroyed && !bricks[i]->isSolid)
+            return false;
+    }
+    return true;
 }
