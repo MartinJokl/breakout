@@ -32,7 +32,9 @@ add_executable(${PROJECT_NAME}
     powerup.h
     powerup.c
     text.h
-    text.c)
+    text.c
+    icon.rc
+    info.rc)
 
 # copy shader and asset files
 file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS 
