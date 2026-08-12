@@ -109,11 +109,14 @@ void processGameInput(Game *game, float deltaTime) {
     if (game->state != GAME_ACTIVE) {
         if (game->keys[GLFW_KEY_SPACE])
             game->state = GAME_ACTIVE;
-        if (game->newKeys[GLFW_KEY_W])
-            game->currentLevel++;
-        if (game->newKeys[GLFW_KEY_S])
-            game->currentLevel += sizeof(game->levels) / sizeof(GameLevel);
-        game->currentLevel %= sizeof(game->levels) / sizeof(GameLevel) + 1;
+        if (game->keys[GLFW_KEY_W] || game->keys[GLFW_KEY_S]) {
+            if (game->newKeys[GLFW_KEY_W])
+                game->currentLevel++;
+            if (game->newKeys[GLFW_KEY_S])
+                game->currentLevel += sizeof(game->levels) / sizeof(GameLevel);
+            game->currentLevel %= sizeof(game->levels) / sizeof(GameLevel) + 1;
+            game->state = GAME_MENU;
+        }
     }
     if (game->state == GAME_ACTIVE) {
         float velocity = game->player->velocity.x * deltaTime;
