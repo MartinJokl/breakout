@@ -39,7 +39,7 @@ typedef struct {
     float shakeTime;
 } Game;
 
-Game *createGame(unsigned int width, unsigned int height);
+Game *createGame(unsigned int width, unsigned int height, unsigned int windowWidth, unsigned int windowHeight);
 void freeGame(Game *game);
 
 void processGameInput(Game *game, float deltaTime);

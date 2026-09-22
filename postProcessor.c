@@ -6,13 +6,13 @@
 
 void initRenderData(PostProcessor *postProcessor);
 
-PostProcessor *createPostProcessor(unsigned int width, unsigned int height) {
+PostProcessor *createPostProcessor(unsigned int windowWidth, unsigned int windowHeight) {
     PostProcessor *postProcessor = malloc(sizeof(PostProcessor));
     postProcessor->chaos = false;
     postProcessor->confuse = false;
     postProcessor->shake = false;
-    postProcessor->width = width;
-    postProcessor->height = height;
+    postProcessor->width = windowWidth;
+    postProcessor->height = windowHeight;
 
     glGenFramebuffers(1, &postProcessor->MSFBO);
     glGenFramebuffers(1, &postProcessor->FBO);
@@ -20,7 +20,7 @@ PostProcessor *createPostProcessor(unsigned int width, unsigned int height) {
     // initialize renderbuffer storage with a multisampled color buffer (don't need a depth/stencil buffer)
     glBindFramebuffer(GL_FRAMEBUFFER, postProcessor->MSFBO);
     glBindRenderbuffer(GL_RENDERBUFFER, postProcessor->RBO);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, width, height); // allocate storage for render buffer object
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGB, windowWidth, windowHeight); // allocate storage for render buffer object
     // attach MS render buffer object to framebuffer
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, postProcessor->RBO); 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -32,7 +32,7 @@ PostProcessor *createPostProcessor(unsigned int width, unsigned int height) {
     glGenTextures(1, &postProcessor->textureId);  
     glBindTexture(GL_TEXTURE_2D, postProcessor->textureId);  
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -10,8 +10,13 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 
-const unsigned int screenWidth = 1200;
-const unsigned int screenHeight = 900;
+const unsigned int gameWidth = 1200;
+const unsigned int gameHeight = 900;
+
+// Separate to make it easy to change window size without 
+// changing the ball velocity and things like that
+const unsigned int windowWidth = 1200;
+const unsigned int windowHeight = 900;
 
 Game *game;
 
@@ -23,7 +28,7 @@ int main() {
 
     glfwWindowHint(GLFW_RESIZABLE, false);
 
-    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "Breakout", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Breakout", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -31,11 +36,11 @@ int main() {
     glfwSetKeyCallback(window, keyCallback);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    glViewport(0, 0, screenWidth, screenHeight);
+    glViewport(0, 0, windowWidth, windowHeight);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    game = createGame(screenWidth, screenHeight);
+    game = createGame(gameWidth, gameHeight, windowWidth, windowHeight);
 
     float lastFrame = 0.0f;
     while (!glfwWindowShouldClose(window)) {

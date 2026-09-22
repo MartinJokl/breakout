@@ -18,7 +18,7 @@ typedef struct {
 } PostProcessor;
 
 
-PostProcessor *createPostProcessor(unsigned int width, unsigned int height);
+PostProcessor *createPostProcessor(unsigned int windowWidth, unsigned int windowHeight);
 void freePostProcessor(PostProcessor *postProcessor);
 
 // prepares the postprocessor's framebuffer operations before rendering the game

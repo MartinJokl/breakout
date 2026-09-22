@@ -38,7 +38,7 @@ void doGameCollisions(Game *game);
 Collision checkCollision(BallObject *ball, GameObject *object);
 bool checkCollisionSquares(GameObject *a, GameObject *b);
 
-Game *createGame(unsigned int width, unsigned int height) {
+Game *createGame(unsigned int width, unsigned int height, unsigned int windowWidth, unsigned int windowHeight) {
     Game *game = malloc(sizeof(Game));
 
     memset(game->keys, false, sizeof(game->keys) / sizeof(bool));
@@ -70,7 +70,7 @@ Game *createGame(unsigned int width, unsigned int height) {
     Vec2 ballPos = {playerPos.x + playerSize.x / 2.0f - ballRadius, playerPos.y - ballRadius * 2.0f};
     game->ball = createBallObject(game->textureManager->ball, ballPos, ballRadius, initialBallVelocity);
 
-    game->postProcessor = createPostProcessor(width, height);
+    game->postProcessor = createPostProcessor(windowWidth, windowHeight);
 
     game->powerUpPointers = createList(8, sizeof(PowerUp *));
 
